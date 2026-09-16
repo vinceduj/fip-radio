@@ -1,0 +1,162 @@
+@font-face {
+  font-family: "IBM Plex Sans";
+  src: url("fonts/ibm-plex-sans-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IBM Plex Sans";
+  src: url("fonts/ibm-plex-sans-500.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IBM Plex Sans Condensed";
+  src: url("fonts/ibm-plex-sans-condensed-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --bg: #121212;
+  --ink: #f3efe4;
+  --muted: #8a8680;
+  --rule: #2a2a2a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+body {
+  width: 260px;
+  padding: 16px 16px 14px;
+  font-family: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.wordmark {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.38em;
+  text-indent: 0.08em;
+  color: var(--ink);
+}
+
+.wordmark.playing::after {
+  content: "";
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  margin-left: 10px;
+  border-radius: 50%;
+  background: #e24a8a;
+  vertical-align: 1px;
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+.stations {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.station {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin: 0;
+  padding: 9px 10px 9px 12px;
+  border: 0;
+  border-left: 2px solid transparent;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 0;
+}
+
+.station:hover {
+  background: #1a1a1a;
+}
+
+.station:focus-visible {
+  outline: 1px solid var(--accent, #e24a8a);
+  outline-offset: 1px;
+}
+
+.station.active {
+  border-left-color: var(--accent);
+}
+
+.station .mark {
+  font-size: 9px;
+  color: var(--accent);
+  letter-spacing: 0;
+}
+
+.now {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--rule);
+  min-height: 2.6em;
+  font-family: "IBM Plex Sans Condensed", "IBM Plex Sans", sans-serif;
+}
+
+.title {
+  font-size: 13px;
+  line-height: 1.25;
+  color: var(--ink);
+}
+
+.artist {
+  margin-top: 3px;
+  font-size: 12px;
+  line-height: 1.25;
+  color: var(--muted);
+}
+
+.title:empty,
+.artist:empty {
+  display: none;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.22;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wordmark.playing::after {
+    animation: none;
+  }
+}
