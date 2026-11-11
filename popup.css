@@ -50,7 +50,28 @@ body {
 header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   margin-bottom: 14px;
+}
+
+.settings {
+  appearance: none;
+  margin: 0;
+  padding: 2px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  line-height: 0;
+  cursor: pointer;
+}
+
+.settings:hover {
+  color: var(--ink);
+}
+
+.settings:focus-visible {
+  outline: 1px solid var(--accent, #e24a8a);
+  outline-offset: 2px;
 }
 
 .wordmark {
@@ -68,15 +89,28 @@ header {
   height: 5px;
   margin-left: 10px;
   border-radius: 50%;
-  background: #e24a8a;
+  background: var(--accent, #e24a8a);
   vertical-align: 1px;
   animation: pulse 1.6s ease-in-out infinite;
+}
+
+.empty {
+  margin: 0 0 8px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.empty[hidden] {
+  display: none;
 }
 
 .stations {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  max-height: 430px;
+  overflow-y: auto;
 }
 
 .station {
@@ -111,6 +145,12 @@ header {
 
 .station.active {
   border-left-color: var(--accent);
+}
+
+.station .label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .station .mark {

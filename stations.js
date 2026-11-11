@@ -1,3 +1,5 @@
+// Live, Groove, Jazz, and Electro keep their original streams and colors.
+// livemetaApi "live" is the newer endpoint. The others still answer on /pull.
 export const STATIONS = [
   {
     id: "live",
@@ -30,6 +32,82 @@ export const STATIONS = [
     fallback: "https://icecast.radiofrance.fr/fipelectro-midfi.mp3?id=radiofrance",
     livemetaId: 74,
     accent: "#2BBF9A",
+  },
+  {
+    id: "cultes",
+    label: "Cultes",
+    stream: "https://icecast.radiofrance.fr/fipcultes-hifi.aac?id=radiofrance",
+    fallback: "https://icecast.radiofrance.fr/fipcultes-midfi.mp3?id=radiofrance",
+    livemetaId: 709,
+    livemetaApi: "live",
+    accent: "#E08A3A",
+  },
+  {
+    id: "sacre",
+    label: "Sacré français !",
+    stream: "https://icecast.radiofrance.fr/fipsacrefrancais-hifi.aac?id=radiofrance",
+    fallback: "https://icecast.radiofrance.fr/fipsacrefrancais-midfi.mp3?id=radiofrance",
+    livemetaId: 96,
+    livemetaApi: "live",
+    accent: "#E25B6A",
+  },
+  {
+    id: "rock",
+    label: "Rock",
+    stream: "https://icecast.radiofrance.fr/fiprock-hifi.aac?id=radiofrance",
+    fallback: "https://icecast.radiofrance.fr/fiprock-midfi.mp3?id=radiofrance",
+    livemetaId: 64,
+    accent: "#E04B3A",
+  },
+  {
+    id: "reggae",
+    label: "Reggae",
+    stream: "https://icecast.radiofrance.fr/fipreggae-hifi.aac?id=radiofrance",
+    fallback: "https://icecast.radiofrance.fr/fipreggae-midfi.mp3?id=radiofrance",
+    livemetaId: 71,
+    accent: "#3FBF55",
+  },
+  {
+    id: "pop",
+    label: "Pop",
+    stream: "https://icecast.radiofrance.fr/fippop-hifi.aac?id=radiofrance",
+    fallback: "https://icecast.radiofrance.fr/fippop-midfi.mp3?id=radiofrance",
+    livemetaId: 78,
+    livemetaApi: "live",
+    accent: "#C46BE8",
+  },
+  {
+    id: "monde",
+    label: "Monde",
+    stream: "https://icecast.radiofrance.fr/fipworld-hifi.aac?id=radiofrance",
+    fallback: "https://icecast.radiofrance.fr/fipworld-midfi.mp3?id=radiofrance",
+    livemetaId: 69,
+    accent: "#3DB8C9",
+  },
+  {
+    id: "nouveautes",
+    label: "Nouveautés",
+    stream: "https://icecast.radiofrance.fr/fipnouveautes-hifi.aac?id=radiofrance",
+    fallback: "https://icecast.radiofrance.fr/fipnouveautes-midfi.mp3?id=radiofrance",
+    livemetaId: 70,
+    accent: "#C6D64A",
+  },
+  {
+    id: "hiphop",
+    label: "Hip-Hop",
+    stream: "https://icecast.radiofrance.fr/fiphiphop-hifi.aac?id=radiofrance",
+    fallback: "https://icecast.radiofrance.fr/fiphiphop-midfi.mp3?id=radiofrance",
+    livemetaId: 95,
+    livemetaApi: "live",
+    accent: "#8B7AE6",
+  },
+  {
+    id: "metal",
+    label: "Metal",
+    stream: "https://icecast.radiofrance.fr/fipmetal-hifi.aac?id=radiofrance",
+    fallback: "https://icecast.radiofrance.fr/fipmetal-midfi.mp3?id=radiofrance",
+    livemetaId: 77,
+    accent: "#C5C8D0",
   },
 ];
 
@@ -73,5 +151,24 @@ export function nowPlayingFromStep(step) {
     artist,
     visual: step.visual || "",
     end: step.end || 0,
+  };
+}
+
+const COVER_ID =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export function nowPlayingFromLive(now) {
+  if (!now?.songUuid) return null;
+  const title = clean(now.firstLine);
+  const artist = clean(now.secondLine);
+  if (!title && !artist) return null;
+  const cover = typeof now.cover === "string" ? now.cover.trim() : "";
+  return {
+    title,
+    artist,
+    visual: COVER_ID.test(cover)
+      ? `https://www.radiofrance.fr/pikapi/images/${cover}/400x400?webp=false`
+      : "",
+    end: Number(now.endTime) || 0,
   };
 }

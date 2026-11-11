@@ -1,8 +1,5 @@
-import {
-  getStation,
-  currentStep,
-  nowPlayingFromStep,
-} from "./stations.js";
+import { currentStep, nowPlayingFromStep, nowPlayingFromLive } from "./stations.js";
+import { isPlayable, loadPreferences, resolveStation } from "./preferences.js";
 
 const LIVEMETA_ALARM = "livemeta";
 
@@ -85,8 +82,35 @@ function tooltipTitle(state) {
   return text.length > 128 ? `${text.slice(0, 127)}…` : text;
 }
 
+async function stationFor(id) {
+  return resolveStation(id, await loadPreferences());
+}
+
+async function loadMetadata(station) {
+  if (station.livemetaApi === "live") {
+    const res = await fetch(
+      `https://api.radiofrance.fr/livemeta/live/${station.livemetaId}/webrf_webradio_player`,
+    );
+    if (!res.ok) throw new Error(String(res.status));
+    const data = await res.json();
+    const nowPlaying = nowPlayingFromLive(data?.now);
+    return {
+      nowPlaying,
+      step: nowPlaying?.end ? { end: nowPlaying.end } : null,
+    };
+  }
+
+  const res = await fetch(
+    `https://api.radiofrance.fr/livemeta/pull/${station.livemetaId}`,
+  );
+  if (!res.ok) throw new Error(String(res.status));
+  const data = await res.json();
+  const step = currentStep(data);
+  return { nowPlaying: nowPlayingFromStep(step), step };
+}
+
 async function syncAction(state) {
-  const station = getStation(state.stationId);
+  const station = await stationFor(state.stationId);
   await chrome.action.setIcon({
     path: {
       16: "icons/icon16.png",
@@ -119,13 +143,7 @@ function scheduleLivemeta(step) {
 
 async function refreshNowPlaying(station) {
   try {
-    const res = await fetch(
-      `https://api.radiofrance.fr/livemeta/pull/${station.livemetaId}`,
-    );
-    if (!res.ok) throw new Error(String(res.status));
-    const data = await res.json();
-    const step = currentStep(data);
-    const nowPlaying = nowPlayingFromStep(step);
+    const { nowPlaying, step } = await loadMetadata(station);
     await chrome.storage.local.set({ nowPlaying, stationId: station.id });
     chrome.runtime
       .sendMessage({
@@ -145,7 +163,9 @@ async function refreshNowPlaying(station) {
 }
 
 async function play(stationId) {
-  const station = getStation(stationId);
+  const prefs = await loadPreferences();
+  if (!isPlayable(stationId, prefs)) return getFullState();
+  const station = resolveStation(stationId, prefs);
   await ensureOffscreen();
   const player = await chrome.runtime.sendMessage({
     type: "player/play",
@@ -182,8 +202,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   if (msg?.type === "ui/get-state") {
     getFullState().then((state) => {
       sendResponse(state);
-      const station = getStation(state.stationId);
-      refreshNowPlaying(station);
+      stationFor(state.stationId).then((station) => refreshNowPlaying(station));
     });
     return true;
   }
@@ -197,7 +216,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     getFullState().then(async (state) => {
       await syncAction(state);
       broadcast(state);
-      if (state.playing) refreshNowPlaying(getStation(state.stationId));
+      if (state.playing) refreshNowPlaying(await stationFor(state.stationId));
       else chrome.alarms.clear(LIVEMETA_ALARM);
     });
   }
@@ -207,7 +226,19 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name !== LIVEMETA_ALARM) return;
   const state = await getFullState();
   if (!state.playing) return;
-  await refreshNowPlaying(getStation(state.stationId));
+  await refreshNowPlaying(await stationFor(state.stationId));
+});
+
+chrome.storage.onChanged.addListener(async (changes, area) => {
+  if (area !== "local" || !changes.preferences) return;
+  const state = await getFullState();
+  const prefs = changes.preferences.newValue ?? {};
+  if (state.playing && !isPlayable(state.stationId, prefs)) {
+    await pause();
+    return;
+  }
+  await syncAction(state);
+  broadcast(state);
 });
 
 chrome.runtime.onInstalled.addListener(async () => {

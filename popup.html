@@ -8,7 +8,24 @@
   <body>
     <header>
       <span class="wordmark" id="wordmark">FIP</span>
+      <button type="button" class="settings" id="settings" aria-label="Settings">
+        <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true">
+          <path
+            d="M1 3.5h8.2M12.6 3.5H15M1 8h2.4M6.2 8H15M1 12.5h5.2M9.6 12.5H15"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.4"
+            stroke-linecap="round"
+          />
+          <circle cx="11.2" cy="3.5" r="1.55" fill="none" stroke="currentColor" stroke-width="1.4" />
+          <circle cx="4.6" cy="8" r="1.55" fill="none" stroke="currentColor" stroke-width="1.4" />
+          <circle cx="7.8" cy="12.5" r="1.55" fill="none" stroke="currentColor" stroke-width="1.4" />
+        </svg>
+      </button>
     </header>
+    <p class="empty" id="empty" hidden>
+      No stations selected. Open settings to choose which ones appear.
+    </p>
     <nav class="stations" id="stations" aria-label="Stations"></nav>
     <footer class="now">
       <div class="title" id="title"></div>
